@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import type { MenuOption } from 'naive-ui'
-import { computed, h } from 'vue'
+import { computed, h, ref } from 'vue'
 import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NMenu, NIcon } from 'naive-ui'
 import { BookOutline as BookIcon, PersonOutline as PersonIcon, WineOutline as WineIcon } from '@vicons/ionicons5'
 import { useRoute, useRouter } from 'vue-router'
+import logoUrl from '@renderer/assets/electron.svg'
 
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -52,6 +53,7 @@ const menuOptions: MenuOption[] = [
 
 const route = useRoute()
 const router = useRouter()
+const collapsed = ref(false)
 
 const activeKey = computed<string | null>({
   get: () => route.path,
@@ -71,11 +73,24 @@ const pageTitle = computed(() => (route.meta.title as string) || '控制台')
       show-trigger
       collapse-mode="width"
       :collapsed-width="64"
-      :width="220"
+      :width="200"
+      :collapsed="collapsed"
+      @collapse="collapsed = true"
+      @expand="collapsed = false"
       class="app-sider"
     >
-      <div class="app-brand">控制台</div>
-      <n-menu v-model:value="activeKey" :options="menuOptions" />
+      <div class="app-brand" :class="{ collapsed }">
+        <img class="app-logo" :src="logoUrl" alt="logo" />
+        <span v-if="collapsed">控</span>
+        <span v-else>控制台</span>
+      </div>
+      <n-menu
+        v-model:value="activeKey"
+        :options="menuOptions"
+        :collapsed="collapsed"
+        :collapsed-width="64"
+        :collapsed-icon-size="22"
+      />
     </n-layout-sider>
     <n-layout>
       <n-layout-header bordered class="app-header">{{ pageTitle }}</n-layout-header>
