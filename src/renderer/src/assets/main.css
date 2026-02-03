@@ -42,6 +42,7 @@ body {
 
 .app-brand.collapsed {
   padding: 14px 0;
+  gap: 0;
 }
 
 .app-header {
@@ -53,11 +54,4 @@ body {
 .app-content {
   padding: 20px;
   min-height: 0;
-}
-
-.content-card {
-  padding: 16px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(20, 24, 35, 0.08);
 }

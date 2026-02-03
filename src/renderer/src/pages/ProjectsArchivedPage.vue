@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NCard, NH2, NP, NSpace, NTag } from 'naive-ui'
+import { NCard, NP, NSpace, NTag } from 'naive-ui'
 
 const archived = [
   { name: '旧版 UI', date: '2025-11-02' },
@@ -9,11 +9,6 @@ const archived = [
 
 <template>
   <n-space vertical size="large">
-    <div>
-      <n-h2 style="margin: 0">项目 · 归档</n-h2>
-      <n-p depth="3" style="margin: 6px 0 0">归档项目不会参与日常迭代，仅用于历史追溯。</n-p>
-    </div>
-
     <n-card size="small">
       <n-space align="center">
         <n-tag type="default">Archived</n-tag>
@@ -31,4 +26,3 @@ const archived = [
     </n-card>
   </n-space>
 </template>
-

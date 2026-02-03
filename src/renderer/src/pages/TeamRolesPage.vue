@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NCard, NH2, NP, NSpace, NTag } from 'naive-ui'
+import { NCard, NP, NSpace, NTag } from 'naive-ui'
 
 const roles = [
   { name: 'Owner', desc: '项目负责人，拥有所有权限', level: 'high' },
@@ -17,11 +17,6 @@ function roleTagType(level: string) {
 
 <template>
   <n-space vertical size="large">
-    <div>
-      <n-h2 style="margin: 0">团队 · 角色</n-h2>
-      <n-p depth="3" style="margin: 6px 0 0">权限体系示例（模拟数据）。</n-p>
-    </div>
-
     <n-card title="角色列表" size="small">
       <n-space vertical>
         <div v-for="r in roles" :key="r.name">
@@ -35,4 +30,3 @@ function roleTagType(level: string) {
     </n-card>
   </n-space>
 </template>
-

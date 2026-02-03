@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NCard, NH2, NP, NSpace, NSwitch, NTag } from 'naive-ui'
+import { NCard, NP, NSpace, NSwitch, NTag } from 'naive-ui'
 import { ref } from 'vue'
 
 const autoUpdate = ref(true)
@@ -8,11 +8,6 @@ const analytics = ref(false)
 
 <template>
   <n-space vertical size="large">
-    <div>
-      <n-h2 style="margin: 0">设置</n-h2>
-      <n-p depth="3" style="margin: 6px 0 0">这里放应用级配置（示例）。</n-p>
-    </div>
-
     <n-card title="偏好设置" size="small">
       <n-space vertical>
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
@@ -41,4 +36,3 @@ const analytics = ref(false)
     </n-card>
   </n-space>
 </template>
-

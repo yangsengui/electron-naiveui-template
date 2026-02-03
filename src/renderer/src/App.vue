@@ -73,7 +73,7 @@ const pageTitle = computed(() => (route.meta.title as string) || '控制台')
       show-trigger
       collapse-mode="width"
       :collapsed-width="64"
-      :width="200"
+      :width="180"
       :collapsed="collapsed"
       @collapse="collapsed = true"
       @expand="collapsed = false"
@@ -81,8 +81,7 @@ const pageTitle = computed(() => (route.meta.title as string) || '控制台')
     >
       <div class="app-brand" :class="{ collapsed }">
         <img class="app-logo" :src="logoUrl" alt="logo" />
-        <span v-if="collapsed">控</span>
-        <span v-else>控制台</span>
+        <span v-if="!collapsed">控制台</span>
       </div>
       <n-menu
         v-model:value="activeKey"
@@ -95,9 +94,7 @@ const pageTitle = computed(() => (route.meta.title as string) || '控制台')
     <n-layout>
       <n-layout-header bordered class="app-header">{{ pageTitle }}</n-layout-header>
       <n-layout-content class="app-content">
-        <div class="content-card">
-          <router-view />
-        </div>
+        <router-view />
       </n-layout-content>
     </n-layout>
   </n-layout>

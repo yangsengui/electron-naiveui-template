@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NAvatar, NCard, NH2, NP, NSpace, NTag } from 'naive-ui'
+import { NAvatar, NCard, NP, NSpace, NTag } from 'naive-ui'
 
 const members = [
   { name: 'Yang', role: 'Owner', color: '#4f46e5' },
@@ -10,11 +10,6 @@ const members = [
 
 <template>
   <n-space vertical size="large">
-    <div>
-      <n-h2 style="margin: 0">团队 · 成员</n-h2>
-      <n-p depth="3" style="margin: 6px 0 0">成员信息示例（模拟数据）。</n-p>
-    </div>
-
     <n-card title="成员列表" size="small">
       <n-space vertical>
         <div v-for="m in members" :key="m.name" style="display: flex; align-items: center; gap: 12px">
@@ -31,4 +26,3 @@ const members = [
     </n-card>
   </n-space>
 </template>
-

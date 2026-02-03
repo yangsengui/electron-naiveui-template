@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NCard, NH2, NP, NSpace, NTag } from 'naive-ui'
+import { NButton, NCard, NSpace, NTag } from 'naive-ui'
 
 const items = [
   { name: '桌面端壳工程', owner: 'Yang', status: '进行中' },
@@ -10,11 +10,6 @@ const items = [
 
 <template>
   <n-space vertical size="large">
-    <div>
-      <n-h2 style="margin: 0">项目 · 进行中</n-h2>
-      <n-p depth="3" style="margin: 6px 0 0">一些模拟数据，用于展示不同页面的内容。</n-p>
-    </div>
-
     <n-card size="small">
       <n-space justify="space-between" align="center">
         <div>
@@ -37,4 +32,3 @@ const items = [
     </n-card>
   </n-space>
 </template>
-
