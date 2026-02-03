@@ -10,6 +10,18 @@
 - **主题同步**：渲染进程暗黑模式，并通过 IPC 同步到系统 `nativeTheme`
 - **标题栏融合（Win/Linux）**：`titleBarOverlay` 随主题变化动态调整标题栏颜色
 
+## 界面截图
+
+| 登录 | 项目 |
+| --- | --- |
+| <img alt="登录" src="screenshots/登录.png" width="420" /> | <img alt="项目" src="screenshots/项目.png" width="420" /> |
+
+| 团队 | 设置 |
+| --- | --- |
+| <img alt="团队" src="screenshots/团队.png" width="420" /> | <img alt="设置" src="screenshots/设置.png" width="420" /> |
+
+<img alt="黑夜模式" src="screenshots/黑夜模式.png" width="860" />
+
 ## 技术栈
 
 - Electron + electron-vite
