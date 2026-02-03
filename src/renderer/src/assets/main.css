@@ -15,10 +15,12 @@ body {
     Arial,
     sans-serif;
   background: #f6f7fb;
+  overflow: hidden;
 }
 
 .app-layout {
   height: 100%;
+  overflow: hidden;
 }
 
 .app-brand {

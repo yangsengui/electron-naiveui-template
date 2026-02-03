@@ -12,7 +12,6 @@ import {
   NText,
   darkTheme,
   NLayout,
-  NLayoutContent,
   NLayoutHeader,
   NLayoutSider,
   NMenu,
@@ -168,9 +167,11 @@ onMounted(() => {
 <template>
   <n-config-provider :theme="naiveTheme" :class="['app-root', { 'is-dark': isDark }]">
     <n-global-style />
-    <n-layout :has-sider="!isAuthRoute" class="app-layout">
+    <div v-if="isAuthRoute" class="app-layout">
+      <router-view />
+    </div>
+    <n-layout v-else :has-sider="true" class="app-layout">
       <n-layout-sider
-        v-if="!isAuthRoute"
         bordered
         show-trigger
         collapse-mode="width"
@@ -204,7 +205,7 @@ onMounted(() => {
           </n-dropdown>
         </div>
       </n-layout-sider>
-      <n-layout>
+      <n-layout class="app-main">
         <n-layout-header
           bordered
           class="app-header app-titlebar"
@@ -224,9 +225,9 @@ onMounted(() => {
             </n-tooltip>
           </div>
         </n-layout-header>
-        <n-layout-content class="app-content">
+        <div class="app-content app-main-content">
           <router-view />
-        </n-layout-content>
+        </div>
       </n-layout>
     </n-layout>
   </n-config-provider>
@@ -300,6 +301,9 @@ onMounted(() => {
   gap: 10px;
   user-select: none;
   -webkit-app-region: drag;
+  position: sticky;
+  top: 0;
+  z-index: 20;
   transition:
     background-color 180ms ease,
     color 180ms ease;
@@ -323,5 +327,18 @@ onMounted(() => {
 
 .app-titlebar-btn {
   -webkit-app-region: no-drag;
+}
+
+.app-main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-main-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 </style>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import {
+  NCard,
   NDescriptions,
   NDescriptionsItem,
-  NDivider,
   NGrid,
   NGridItem,
   NNumberAnimation,
@@ -34,29 +34,36 @@ const recent = [
   <n-space vertical size="large">
     <n-grid :x-gap="12" :y-gap="12" cols="1 s:2 m:4">
       <n-grid-item v-for="it in stats" :key="it.label">
-        <n-statistic :label="it.label">
-          <n-number-animation :from="0" :to="it.value" :duration="600" />
-        </n-statistic>
+        <n-card size="small" :bordered="false" embedded>
+          <n-statistic :label="it.label">
+            <n-number-animation :from="0" :to="it.value" :duration="600" />
+          </n-statistic>
+        </n-card>
       </n-grid-item>
     </n-grid>
 
-    <n-divider />
-
-    <n-descriptions title="运行环境" bordered size="small" :column="3" label-placement="left">
-      <n-descriptions-item label="Electron">{{ versions.electron }}</n-descriptions-item>
-      <n-descriptions-item label="Chromium">{{ versions.chrome }}</n-descriptions-item>
-      <n-descriptions-item label="Node">{{ versions.node }}</n-descriptions-item>
-      <n-descriptions-item label="V8">{{ versions.v8 }}</n-descriptions-item>
-      <n-descriptions-item label="Platform">{{ platform }}</n-descriptions-item>
-      <n-descriptions-item label="OpenSSL">{{ versions.openssl ?? '—' }}</n-descriptions-item>
-    </n-descriptions>
-
-    <n-divider />
-
-    <n-timeline>
-      <n-timeline-item v-for="it in recent" :key="it.title" :type="it.type" :title="it.title">
-        {{ it.content }}
-      </n-timeline-item>
-    </n-timeline>
+    <n-grid cols="1 m:2" :x-gap="12" :y-gap="12">
+      <n-grid-item>
+        <n-card title="运行环境" size="small">
+          <n-descriptions bordered size="small" :column="2" label-placement="left">
+            <n-descriptions-item label="Electron">{{ versions.electron }}</n-descriptions-item>
+            <n-descriptions-item label="Chromium">{{ versions.chrome }}</n-descriptions-item>
+            <n-descriptions-item label="Node">{{ versions.node }}</n-descriptions-item>
+            <n-descriptions-item label="V8">{{ versions.v8 }}</n-descriptions-item>
+            <n-descriptions-item label="Platform">{{ platform }}</n-descriptions-item>
+            <n-descriptions-item label="OpenSSL">{{ versions.openssl ?? '—' }}</n-descriptions-item>
+          </n-descriptions>
+        </n-card>
+      </n-grid-item>
+      <n-grid-item>
+        <n-card title="动态" size="small">
+          <n-timeline>
+            <n-timeline-item v-for="it in recent" :key="it.title" :type="it.type" :title="it.title">
+              {{ it.content }}
+            </n-timeline-item>
+          </n-timeline>
+        </n-card>
+      </n-grid-item>
+    </n-grid>
   </n-space>
 </template>
