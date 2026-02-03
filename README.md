@@ -1,20 +1,28 @@
 # electron-naiveui-template
 
-基于 **Electron + electron-vite + Vue 3 + TypeScript + Naive UI** 的桌面端模板工程，内置后台管理类 UI 示例（登录页、侧边栏布局、路由守卫、暗黑模式、基础页面）。
+一套可直接复用的桌面端工程模板，基于 **Electron + electron-vite + Vue 3 + TypeScript + Naive UI**，内置后台管理类界面示例（登录页、侧边栏布局、路由守卫、暗黑模式与基础页面）。
 
-## 你会得到什么
+## 特性
 
-- Electron 主进程 / 预加载 / 渲染进程的标准目录结构
-- Vue Router（`hash` 模式，适配 `file://`）+ 登录态示例（localStorage）
-- Naive UI：布局、菜单、表格、表单等示例页面
-- 主题切换：渲染进程暗黑模式，并通过 IPC 同步到系统 `nativeTheme`
-- Windows / Linux：`titleBarOverlay` 示例（随主题变化动态调整标题栏颜色）
+- **标准工程分层**：Main / Preload / Renderer 目录结构清晰，便于扩展与维护
+- **路由与登录态示例**：Vue Router（`hash`，适配 `file://`）+ localStorage 登录态
+- **Naive UI 示例**：布局、菜单、表格、表单等页面可直接改造
+- **主题同步**：渲染进程暗黑模式，并通过 IPC 同步到系统 `nativeTheme`
+- **标题栏融合（Win/Linux）**：`titleBarOverlay` 随主题变化动态调整标题栏颜色
+
+## 技术栈
+
+- Electron + electron-vite
+- Vue 3 + TypeScript
+- Naive UI + Vue Router
+- electron-builder（打包）
+- electron-updater（可选：自动更新）
 
 ## 环境要求
 
-- Node.js：建议使用 **18+**（越新越好）
+- Node.js：建议 **18+**
 - 包管理器：npm（本仓库默认）
-- Windows 打包：需要可用的构建环境（如遇到原生依赖构建失败，请安装对应的构建工具链）
+- Windows 打包：需要可用的构建环境（如遇原生依赖构建失败，请安装对应工具链）
 
 ## 快速开始
 
@@ -23,32 +31,30 @@ npm install
 npm run dev
 ```
 
-常用命令：
+## 常用脚本
 
-```bash
-# 代码格式化 / 质量检查 / 类型检查
-npm run format
-npm run lint
-npm run typecheck
+| 命令 | 说明 |
+| --- | --- |
+| `npm run dev` | 本地开发（HMR） |
+| `npm run build` | 构建（仅编译） |
+| `npm run start` | 预览运行构建产物 |
+| `npm run build:unpack` | 打包为目录产物（不生成安装包） |
+| `npm run build:win` | Windows 安装包 |
+| `npm run build:mac` | macOS 安装包 |
+| `npm run build:linux` | Linux 安装包 |
+| `npm run lint` | ESLint 检查 |
+| `npm run typecheck` | TypeScript 类型检查 |
+| `npm run format` | Prettier 格式化 |
 
-# 构建（仅编译）
-npm run build
-
-# 打包产物（electron-builder）
-npm run build:win
-npm run build:mac
-npm run build:linux
-npm run build:unpack
-```
-
-## 如何使用这个模板（推荐做法）
+## 使用模板
 
 ### 方式 A：GitHub「Use this template」
 
-1. 在 GitHub 页面点击 **Use this template** 创建你自己的仓库
-2. 克隆你的新仓库并开始开发
+1. 先在仓库 `Settings -> General` 勾选 `Template repository`
+2. 回到仓库首页点击 **Use this template** 创建你自己的仓库
+3. 克隆新仓库并开始开发
 
-### 方式 B：直接克隆后“断开历史”
+### 方式 B：克隆后断开历史
 
 ```bash
 git clone <你的仓库地址> my-app
@@ -70,18 +76,18 @@ git add .
 git commit -m "init: from electron-naiveui-template"
 ```
 
-## 初始化配置（必改项）
+## 初始化配置（建议尽早修改）
 
-将以下字段替换成你自己的应用信息：
+应用标识相关（影响安装包名、更新、系统识别等）：
 
 - `package.json`：`name` / `version` / `description`
 - `electron-builder.yml`：
-  - `appId`（强烈建议换成你自己的反向域名，如 `com.yourcompany.yourapp`）
+  - `appId`（建议使用反向域名，如 `com.yourcompany.yourapp`）
   - `productName`（安装包展示名）
   - `win.executableName`（Windows 可执行文件名）
 - `dev-app-update.yml`：`updaterCacheDirName`（更新缓存目录名）
-- `src/main/index.ts`：`electronApp.setAppUserModelId('com.electron')`（Windows AppUserModelId，建议与 `appId` 一致或同域）
-- `resources/icon.png`：应用图标（Linux 窗口图标示例已引用该文件）
+- `src/main/index.ts`：`electronApp.setAppUserModelId(...)`（Windows AppUserModelId，建议与 `appId` 同域）
+- `resources/icon.png`：应用图标（Linux 窗口图标示例已引用）
 
 ## 工程结构
 
@@ -92,25 +98,25 @@ src/
   renderer/  # 渲染进程（Vue + Naive UI）
 ```
 
-别名：`electron.vite.config.ts` 中配置了 `@renderer -> src/renderer/src`。
+路径别名：`electron.vite.config.ts` 配置了 `@renderer -> src/renderer/src`。
 
-## IPC / Preload 使用方式
+## IPC / Preload（安全建议）
 
-模板已在 `src/preload/index.ts` 暴露了：
+模板在 `src/preload/index.ts` 暴露了：
 
 - `window.electron`：来自 `@electron-toolkit/preload` 的 Electron API 包装
-- `window.api`：预留给你自定义的桥接 API（当前为空对象）
+- `window.api`：预留的自定义桥接 API（默认空对象）
 
-建议做法：在 `src/preload/index.ts` 中向 `api` 增加你需要的安全方法，并在 `src/preload/index.d.ts` 里补齐类型。
+建议将所有自定义 IPC 能力封装在 `window.api` 中，仅暴露必要的最小接口，并在 `src/preload/index.d.ts` 中补齐类型定义。
 
 ## 自动更新（可选）
 
-本模板已包含 `electron-updater` 依赖，并提供了示例配置：
+工程已包含 `electron-updater` 依赖，并提供示例配置：
 
 - `dev-app-update.yml`
-- `electron-builder.yml` 中的 `publish`
+- `electron-builder.yml` 的 `publish`
 
-注意：目前主进程未内置自动更新逻辑。如果你需要自动更新，请在主进程自行接入 `autoUpdater`（例如在 `app.whenReady()` 后调用 `checkForUpdatesAndNotify()`），并将 `electron-builder.yml` 的 `publish` 配置替换为你真实的发布渠道（如 `github` / `generic` / 私有更新服务）。
+说明：当前主进程未内置自动更新逻辑。若需要启用，请在主进程接入 `autoUpdater`（例如在 `app.whenReady()` 后调用 `checkForUpdatesAndNotify()`），并将 `publish` 替换为你的真实发布渠道（如 `github` / `generic` / 私有更新服务）。
 
 ## 推荐 IDE
 
