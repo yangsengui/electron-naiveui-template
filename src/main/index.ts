@@ -6,7 +6,80 @@ import icon from '../../resources/icon.png?asset'
 const titleBarHeight = 44
 const supportsTitleBarOverlay = process.platform === 'win32' || process.platform === 'linux'
 
+type TitleBarOverlayColors = { color: string; symbolColor: string }
+
+function parseHexColor(hex: string): { r: number; g: number; b: number } {
+  const normalized = hex.replace('#', '').trim()
+  if (normalized.length !== 6) throw new Error(`Invalid hex color: ${hex}`)
+  const r = Number.parseInt(normalized.slice(0, 2), 16)
+  const g = Number.parseInt(normalized.slice(2, 4), 16)
+  const b = Number.parseInt(normalized.slice(4, 6), 16)
+  return { r, g, b }
+}
+
+function toHexColor({ r, g, b }: { r: number; g: number; b: number }): string {
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)))
+  return `#${clamp(r).toString(16).padStart(2, '0')}${clamp(g).toString(16).padStart(2, '0')}${clamp(b)
+    .toString(16)
+    .padStart(2, '0')}`
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t
+}
+
+const overlayState = new WeakMap<BrowserWindow, TitleBarOverlayColors>()
+const overlayAnimationTimer = new WeakMap<BrowserWindow, NodeJS.Timeout>()
+
+function setWindowTitleBarOverlay(win: BrowserWindow, colors: TitleBarOverlayColors): void {
+  win.setTitleBarOverlay({ ...colors, height: titleBarHeight })
+}
+
+function animateWindowTitleBarOverlay(
+  win: BrowserWindow,
+  from: TitleBarOverlayColors,
+  to: TitleBarOverlayColors,
+  durationMs = 180
+): void {
+  const existing = overlayAnimationTimer.get(win)
+  if (existing) clearInterval(existing)
+
+  const fromRgb = parseHexColor(from.color)
+  const toRgb = parseHexColor(to.color)
+  const start = Date.now()
+
+  const timer = setInterval(() => {
+    const elapsed = Date.now() - start
+    const t = Math.min(1, elapsed / durationMs)
+    const color = toHexColor({
+      r: lerp(fromRgb.r, toRgb.r, t),
+      g: lerp(fromRgb.g, toRgb.g, t),
+      b: lerp(fromRgb.b, toRgb.b, t)
+    })
+
+    try {
+      setWindowTitleBarOverlay(win, { color, symbolColor: to.symbolColor })
+    } catch (error) {
+      clearInterval(timer)
+      overlayAnimationTimer.delete(win)
+      console.warn('[titlebar] setTitleBarOverlay failed:', error)
+      return
+    }
+
+    if (t >= 1) {
+      clearInterval(timer)
+      overlayAnimationTimer.delete(win)
+    }
+  }, 16)
+
+  overlayAnimationTimer.set(win, timer)
+}
+
 function createWindow(): void {
+  const initialOverlayColors: TitleBarOverlayColors = nativeTheme.shouldUseDarkColors
+    ? { color: '#18181c', symbolColor: '#ffffff' }
+    : { color: '#ffffff', symbolColor: '#1f2328' }
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -18,8 +91,7 @@ function createWindow(): void {
       ? {
           titleBarStyle: 'hidden',
           titleBarOverlay: {
-            color: '#f6f7fb',
-            symbolColor: '#1f2328',
+            ...initialOverlayColors,
             height: titleBarHeight
           }
         }
@@ -30,6 +102,8 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  if (supportsTitleBarOverlay) overlayState.set(mainWindow, initialOverlayColors)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -65,7 +139,17 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.on('theme:changed', (event, payload: { dark: boolean } | boolean) => {
+  ipcMain.on(
+    'theme:changed',
+    (
+      event,
+      payload:
+        | boolean
+        | {
+            dark: boolean
+            titleBarOverlay?: { color?: string; symbolColor?: string }
+          }
+    ) => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win) return
 
@@ -73,17 +157,35 @@ app.whenReady().then(() => {
     nativeTheme.themeSource = dark ? 'dark' : 'light'
 
     if (!supportsTitleBarOverlay) return
+    const defaults: TitleBarOverlayColors = dark
+      ? { color: '#18181c', symbolColor: '#ffffff' }
+      : { color: '#ffffff', symbolColor: '#1f2328' }
+    const override =
+      typeof payload === 'boolean'
+        ? undefined
+        : {
+            color: payload.titleBarOverlay?.color,
+            symbolColor: payload.titleBarOverlay?.symbolColor
+          }
+
+    const to: TitleBarOverlayColors = {
+      color: override?.color ?? defaults.color,
+      symbolColor: override?.symbolColor ?? defaults.symbolColor
+    }
+    const from: TitleBarOverlayColors = overlayState.get(win) ?? to
+    overlayState.set(win, to)
+
     try {
-      win.setTitleBarOverlay({
-        color: dark ? '#101014' : '#f6f7fb',
-        symbolColor: dark ? '#ffffff' : '#1f2328',
-        height: titleBarHeight
-      })
+      if (from.color === to.color && from.symbolColor === to.symbolColor) {
+        setWindowTitleBarOverlay(win, to)
+      } else {
+        animateWindowTitleBarOverlay(win, from, to)
+      }
     } catch (error) {
-      // Ignore if the current window/platform doesn't support titleBarOverlay.
       console.warn('[theme:changed] setTitleBarOverlay failed:', error)
     }
-  })
+  }
+  )
 
   createWindow()
 

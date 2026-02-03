@@ -30,15 +30,27 @@ function renderIcon(icon: Component) {
 }
 
 const STORAGE_KEY = 'theme:dark'
+const APP_BG_LIGHT = '#f6f7fb'
+const APP_BG_DARK = '#101014'
+const TITLEBAR_BG_LIGHT = '#ffffff'
+const TITLEBAR_BG_DARK = '#18181c'
+const TITLEBAR_SYMBOL_LIGHT = '#1f2328'
+const TITLEBAR_SYMBOL_DARK = '#ffffff'
+
 const isDark = ref<boolean>(
   localStorage.getItem(STORAGE_KEY) !== null
     ? localStorage.getItem(STORAGE_KEY) === '1'
     : (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false)
 )
 const naiveTheme = computed(() => (isDark.value ? darkTheme : null))
+const appBackground = computed(() => (isDark.value ? APP_BG_DARK : APP_BG_LIGHT))
+const titleBarOverlay = computed(() => ({
+  color: isDark.value ? TITLEBAR_BG_DARK : TITLEBAR_BG_LIGHT,
+  symbolColor: isDark.value ? TITLEBAR_SYMBOL_DARK : TITLEBAR_SYMBOL_LIGHT
+}))
 
 function syncNativeTitleBar(): void {
-  window.electron?.ipcRenderer.send('theme:changed', { dark: isDark.value })
+  window.electron?.ipcRenderer.send('theme:changed', { dark: isDark.value, titleBarOverlay: titleBarOverlay.value })
 }
 
 function toggleTheme(): void {
@@ -101,18 +113,19 @@ const pageTitle = computed(() => (route.meta.title as string) || '控制台')
 
 watch(isDark, (value) => {
   localStorage.setItem(STORAGE_KEY, value ? '1' : '0')
-  document.body.style.background = value ? '#101014' : '#f6f7fb'
+  document.body.style.background = appBackground.value
   syncNativeTitleBar()
 })
 
 onMounted(() => {
-  document.body.style.background = isDark.value ? '#101014' : '#f6f7fb'
+  document.body.style.transition = 'background-color 180ms ease'
+  document.body.style.background = appBackground.value
   syncNativeTitleBar()
 })
 </script>
 
 <template>
-  <n-config-provider :theme="naiveTheme">
+  <n-config-provider :theme="naiveTheme" class="app-root">
     <n-global-style />
     <n-layout has-sider class="app-layout">
       <n-layout-sider
@@ -139,7 +152,11 @@ onMounted(() => {
         />
       </n-layout-sider>
       <n-layout>
-        <n-layout-header bordered class="app-header app-titlebar">
+        <n-layout-header
+          bordered
+          class="app-header app-titlebar"
+          :style="{ backgroundColor: titleBarOverlay.color, color: titleBarOverlay.symbolColor }"
+        >
           <div class="app-titlebar-title">{{ pageTitle }}</div>
           <div class="app-titlebar-actions">
             <n-tooltip placement="bottom" trigger="hover">
@@ -163,6 +180,10 @@ onMounted(() => {
 </template>
 
 <style>
+.app-root {
+  height: 100%;
+}
+
 .app-titlebar {
   height: 44px;
   padding: 0 12px;
@@ -171,6 +192,9 @@ onMounted(() => {
   gap: 10px;
   user-select: none;
   -webkit-app-region: drag;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .app-titlebar-title {
