@@ -1,14 +1,48 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import type { MenuOption } from 'naive-ui'
-import { computed, h, ref } from 'vue'
-import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NMenu, NIcon } from 'naive-ui'
-import { BookOutline as BookIcon, PersonOutline as PersonIcon, WineOutline as WineIcon } from '@vicons/ionicons5'
+import { computed, h, onMounted, ref, watch } from 'vue'
+import {
+  NButton,
+  NConfigProvider,
+  NGlobalStyle,
+  NTooltip,
+  darkTheme,
+  NLayout,
+  NLayoutContent,
+  NLayoutHeader,
+  NLayoutSider,
+  NMenu,
+  NIcon
+} from 'naive-ui'
+import {
+  BookOutline as BookIcon,
+  MoonOutline as MoonIcon,
+  PersonOutline as PersonIcon,
+  SunnyOutline as SunIcon,
+  WineOutline as WineIcon
+} from '@vicons/ionicons5'
 import { useRoute, useRouter } from 'vue-router'
 import logoUrl from '@renderer/assets/electron.svg'
 
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
+}
+
+const STORAGE_KEY = 'theme:dark'
+const isDark = ref<boolean>(
+  localStorage.getItem(STORAGE_KEY) !== null
+    ? localStorage.getItem(STORAGE_KEY) === '1'
+    : (window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ?? false)
+)
+const naiveTheme = computed(() => (isDark.value ? darkTheme : null))
+
+function syncNativeTitleBar(): void {
+  window.electron?.ipcRenderer.send('theme:changed', { dark: isDark.value })
+}
+
+function toggleTheme(): void {
+  isDark.value = !isDark.value
 }
 
 const menuOptions: MenuOption[] = [
@@ -64,38 +98,98 @@ const activeKey = computed<string | null>({
 })
 
 const pageTitle = computed(() => (route.meta.title as string) || '控制台')
+
+watch(isDark, (value) => {
+  localStorage.setItem(STORAGE_KEY, value ? '1' : '0')
+  document.body.style.background = value ? '#101014' : '#f6f7fb'
+  syncNativeTitleBar()
+})
+
+onMounted(() => {
+  document.body.style.background = isDark.value ? '#101014' : '#f6f7fb'
+  syncNativeTitleBar()
+})
 </script>
 
 <template>
-  <n-layout has-sider class="app-layout">
-    <n-layout-sider
-      bordered
-      show-trigger
-      collapse-mode="width"
-      :collapsed-width="64"
-      :width="180"
-      :collapsed="collapsed"
-      @collapse="collapsed = true"
-      @expand="collapsed = false"
-      class="app-sider"
-    >
-      <div class="app-brand" :class="{ collapsed }">
-        <img class="app-logo" :src="logoUrl" alt="logo" />
-        <span v-if="!collapsed">控制台</span>
-      </div>
-      <n-menu
-        v-model:value="activeKey"
-        :options="menuOptions"
-        :collapsed="collapsed"
+  <n-config-provider :theme="naiveTheme">
+    <n-global-style />
+    <n-layout has-sider class="app-layout">
+      <n-layout-sider
+        bordered
+        show-trigger
+        collapse-mode="width"
         :collapsed-width="64"
-        :collapsed-icon-size="22"
-      />
-    </n-layout-sider>
-    <n-layout>
-      <n-layout-header bordered class="app-header">{{ pageTitle }}</n-layout-header>
-      <n-layout-content class="app-content">
-        <router-view />
-      </n-layout-content>
+        :width="180"
+        :collapsed="collapsed"
+        class="app-sider"
+        @collapse="collapsed = true"
+        @expand="collapsed = false"
+      >
+        <div class="app-brand" :class="{ collapsed }">
+          <img class="app-logo" :src="logoUrl" alt="logo" />
+          <span v-if="!collapsed">控制台</span>
+        </div>
+        <n-menu
+          v-model:value="activeKey"
+          :options="menuOptions"
+          :collapsed="collapsed"
+          :collapsed-width="64"
+          :collapsed-icon-size="22"
+        />
+      </n-layout-sider>
+      <n-layout>
+        <n-layout-header bordered class="app-header app-titlebar">
+          <div class="app-titlebar-title">{{ pageTitle }}</div>
+          <div class="app-titlebar-actions">
+            <n-tooltip placement="bottom" trigger="hover">
+              <template #trigger>
+                <n-button quaternary circle class="app-titlebar-btn" @click="toggleTheme">
+                  <template #icon>
+                    <n-icon :component="isDark ? SunIcon : MoonIcon" />
+                  </template>
+                </n-button>
+              </template>
+              {{ isDark ? '切换到亮色' : '切换到暗色' }}
+            </n-tooltip>
+          </div>
+        </n-layout-header>
+        <n-layout-content class="app-content">
+          <router-view />
+        </n-layout-content>
+      </n-layout>
     </n-layout>
-  </n-layout>
+  </n-config-provider>
 </template>
+
+<style>
+.app-titlebar {
+  height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.app-titlebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-titlebar-actions {
+  margin-left: auto;
+  padding-right: 140px;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.app-titlebar-btn {
+  -webkit-app-region: no-drag;
+}
+</style>

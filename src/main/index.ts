@@ -1,7 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, nativeTheme } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+
+const titleBarHeight = 44
+const supportsTitleBarOverlay = process.platform === 'win32' || process.platform === 'linux'
 
 function createWindow(): void {
   // Create the browser window.
@@ -10,6 +13,17 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+    frame: true,
+    ...(supportsTitleBarOverlay
+      ? {
+          titleBarStyle: 'hidden',
+          titleBarOverlay: {
+            color: '#f6f7fb',
+            symbolColor: '#1f2328',
+            height: titleBarHeight
+          }
+        }
+      : {}),
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -51,6 +65,25 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on('theme:changed', (event, payload: { dark: boolean } | boolean) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
+
+    const dark = typeof payload === 'boolean' ? payload : payload.dark
+    nativeTheme.themeSource = dark ? 'dark' : 'light'
+
+    if (!supportsTitleBarOverlay) return
+    try {
+      win.setTitleBarOverlay({
+        color: dark ? '#101014' : '#f6f7fb',
+        symbolColor: dark ? '#ffffff' : '#1f2328',
+        height: titleBarHeight
+      })
+    } catch (error) {
+      // Ignore if the current window/platform doesn't support titleBarOverlay.
+      console.warn('[theme:changed] setTitleBarOverlay failed:', error)
+    }
+  })
 
   createWindow()
 
