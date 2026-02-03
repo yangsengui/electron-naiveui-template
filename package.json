@@ -24,8 +24,10 @@
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
     "@vicons/ionicons5": "^0.12.0",
+    "electron-naiveui": "file:",
     "electron-updater": "^6.3.9",
-    "naive-ui": "^2.43.2"
+    "naive-ui": "^2.43.2",
+    "vue-router": "^4.4.5"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "3.0.0",

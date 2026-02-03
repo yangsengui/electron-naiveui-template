@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import type { MenuOption } from 'naive-ui'
-import { h, ref } from 'vue'
-import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NLayoutFooter, NMenu, NIcon } from 'naive-ui'
+import { computed, h } from 'vue'
+import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NMenu, NIcon } from 'naive-ui'
 import { BookOutline as BookIcon, PersonOutline as PersonIcon, WineOutline as WineIcon } from '@vicons/ionicons5'
+import { useRoute, useRouter } from 'vue-router'
 
 function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -12,44 +13,55 @@ function renderIcon(icon: Component) {
 const menuOptions: MenuOption[] = [
   {
     label: '概览',
-    key: 'overview',
+    key: '/overview',
     icon: renderIcon(BookIcon)
   },
   {
     label: '项目',
-    key: 'projects',
+    key: '/projects',
     icon: renderIcon(BookIcon),
     children: [
-      { label: '进行中', key: 'projects-active' },
-      { label: '归档', key: 'projects-archived' }
+      { label: '进行中', key: '/projects/active' },
+      { label: '归档', key: '/projects/archived' }
     ]
   },
   {
     label: '团队',
-    key: 'team',
+    key: '/team',
     icon: renderIcon(PersonIcon),
     children: [
-      { label: '成员', key: 'team-members' },
-      { label: '角色', key: 'team-roles' }
+      { label: '成员', key: '/team/members' },
+      { label: '角色', key: '/team/roles' }
     ]
   },
   {
     label: '资源',
-    key: 'resources',
+    key: '/resources',
     icon: renderIcon(WineIcon),
     children: [
-      { label: '文档', key: 'resources-docs' },
-      { label: '模板', key: 'resources-templates' }
+      { label: '文档', key: '/resources/docs' },
+      { label: '模板', key: '/resources/templates' }
     ]
   },
   {
     label: '设置',
-    key: 'settings',
+    key: '/settings',
     icon: renderIcon(BookIcon)
   }
 ]
 
-const activeKey = ref<string | null>('overview')
+const route = useRoute()
+const router = useRouter()
+
+const activeKey = computed<string | null>({
+  get: () => route.path,
+  set: (key) => {
+    if (!key || key === route.path) return
+    router.push(key)
+  }
+})
+
+const pageTitle = computed(() => (route.meta.title as string) || '控制台')
 </script>
 
 <template>
@@ -62,15 +74,16 @@ const activeKey = ref<string | null>('overview')
       :width="220"
       class="app-sider"
     >
-      <div class="app-brand">NaiveUI</div>
+      <div class="app-brand">控制台</div>
       <n-menu v-model:value="activeKey" :options="menuOptions" />
     </n-layout-sider>
     <n-layout>
-      <n-layout-header bordered class="app-header">控制台</n-layout-header>
+      <n-layout-header bordered class="app-header">{{ pageTitle }}</n-layout-header>
       <n-layout-content class="app-content">
-        <div class="content-card">这里是主内容区域</div>
+        <div class="content-card">
+          <router-view />
+        </div>
       </n-layout-content>
-      <n-layout-footer bordered class="app-footer">© 2026 Electron + Naive UI</n-layout-footer>
     </n-layout>
   </n-layout>
 </template>
