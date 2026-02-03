@@ -117,7 +117,11 @@ function login(): void {
   width: 100vw;
   overflow: hidden;
   position: relative;
-  background-color: var(--n-color-modal); /* Match app theme background */
+  background-color: #ffffff;
+}
+
+:global(.is-dark) .login-wrapper {
+  background-color: #101014;
 }
 
 .drag-region {
@@ -128,12 +132,8 @@ function login(): void {
   height: 40px;
   -webkit-app-region: drag;
   z-index: 9999;
-  /* Allow clicking through to window controls on the right */
   pointer-events: none;
 }
-
-/* Make sure the left side is draggable too via the parent or specific element if needed, 
-   but the top bar covers general moving. */
 
 .login-left {
   flex: 1;
@@ -145,6 +145,9 @@ function login(): void {
   color: white;
   position: relative;
   overflow: hidden;
+  /* Prevent dragging from the branding area if desired, or allow it. 
+     Usually large areas shouldn't be draggable if they have interactive content, 
+     but here it's just branding. */
 }
 
 .brand-content {
@@ -201,8 +204,12 @@ function login(): void {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--n-color-modal); /* Ensure it blends with native titlebar */
   position: relative;
+  background-color: #ffffff;
+}
+
+:global(.is-dark) .login-right {
+  background-color: #101014;
 }
 
 .login-form-container {

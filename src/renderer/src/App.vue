@@ -35,6 +35,9 @@ function renderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) })
 }
 
+const route = useRoute()
+const router = useRouter()
+
 const STORAGE_KEY = 'theme:dark'
 const AUTH_TOKEN_KEY = 'auth:token'
 const AUTH_NAME_KEY = 'auth:name'
@@ -42,6 +45,8 @@ const APP_BG_LIGHT = '#f6f7fb'
 const APP_BG_DARK = '#101014'
 const TITLEBAR_BG_LIGHT = '#ffffff'
 const TITLEBAR_BG_DARK = '#18181c'
+const LOGIN_BG_LIGHT = '#ffffff'
+const LOGIN_BG_DARK = '#101014'
 const TITLEBAR_SYMBOL_LIGHT = '#1f2328'
 const TITLEBAR_SYMBOL_DARK = '#ffffff'
 
@@ -52,14 +57,30 @@ const isDark = ref<boolean>(
 )
 const naiveTheme = computed(() => (isDark.value ? darkTheme : null))
 const appBackground = computed(() => (isDark.value ? APP_BG_DARK : APP_BG_LIGHT))
-const titleBarOverlay = computed(() => ({
-  color: isDark.value ? TITLEBAR_BG_DARK : TITLEBAR_BG_LIGHT,
-  symbolColor: isDark.value ? TITLEBAR_SYMBOL_DARK : TITLEBAR_SYMBOL_LIGHT
-}))
+const isAuthRoute = computed(() => route.path === '/login')
+
+const titleBarOverlay = computed(() => {
+  const isLogin = isAuthRoute.value
+  if (isDark.value) {
+    return {
+      color: isLogin ? LOGIN_BG_DARK : TITLEBAR_BG_DARK,
+      symbolColor: TITLEBAR_SYMBOL_DARK
+    }
+  } else {
+    return {
+      color: isLogin ? LOGIN_BG_LIGHT : TITLEBAR_BG_LIGHT,
+      symbolColor: TITLEBAR_SYMBOL_LIGHT
+    }
+  }
+})
 
 function syncNativeTitleBar(): void {
   window.electron?.ipcRenderer.send('theme:changed', { dark: isDark.value, titleBarOverlay: titleBarOverlay.value })
 }
+
+watch(isAuthRoute, () => {
+  syncNativeTitleBar()
+})
 
 function toggleTheme(): void {
   isDark.value = !isDark.value
@@ -105,10 +126,7 @@ const menuOptions: MenuOption[] = [
   }
 ]
 
-const route = useRoute()
-const router = useRouter()
 const collapsed = ref(false)
-const isAuthRoute = computed(() => route.path === '/login')
 const userName = ref(localStorage.getItem(AUTH_NAME_KEY) ?? '管理员')
 
 watch(
