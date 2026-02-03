@@ -1,26 +1,76 @@
 <script setup lang="ts">
-import Versions from './components/Versions.vue'
+import type { Component } from 'vue'
+import type { MenuOption } from 'naive-ui'
+import { h, ref } from 'vue'
+import { NLayout, NLayoutSider, NLayoutHeader, NLayoutContent, NLayoutFooter, NMenu, NIcon } from 'naive-ui'
+import { BookOutline as BookIcon, PersonOutline as PersonIcon, WineOutline as WineIcon } from '@vicons/ionicons5'
 
-const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+function renderIcon(icon: Component) {
+  return () => h(NIcon, null, { default: () => h(icon) })
+}
+
+const menuOptions: MenuOption[] = [
+  {
+    label: '概览',
+    key: 'overview',
+    icon: renderIcon(BookIcon)
+  },
+  {
+    label: '项目',
+    key: 'projects',
+    icon: renderIcon(BookIcon),
+    children: [
+      { label: '进行中', key: 'projects-active' },
+      { label: '归档', key: 'projects-archived' }
+    ]
+  },
+  {
+    label: '团队',
+    key: 'team',
+    icon: renderIcon(PersonIcon),
+    children: [
+      { label: '成员', key: 'team-members' },
+      { label: '角色', key: 'team-roles' }
+    ]
+  },
+  {
+    label: '资源',
+    key: 'resources',
+    icon: renderIcon(WineIcon),
+    children: [
+      { label: '文档', key: 'resources-docs' },
+      { label: '模板', key: 'resources-templates' }
+    ]
+  },
+  {
+    label: '设置',
+    key: 'settings',
+    icon: renderIcon(BookIcon)
+  }
+]
+
+const activeKey = ref<string | null>('overview')
 </script>
 
 <template>
-  <img alt="logo" class="logo" src="./assets/electron.svg" />
-  <div class="creator">Powered by electron-vite</div>
-  <div class="text">
-    Build an Electron app with
-    <span class="vue">Vue</span>
-    and
-    <span class="ts">TypeScript</span>
-  </div>
-  <p class="tip">Please try pressing <code>F12</code> to open the devTool</p>
-  <div class="actions">
-    <div class="action">
-      <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">Documentation</a>
-    </div>
-    <div class="action">
-      <a target="_blank" rel="noreferrer" @click="ipcHandle">Send IPC</a>
-    </div>
-  </div>
-  <Versions />
+  <n-layout has-sider class="app-layout">
+    <n-layout-sider
+      bordered
+      show-trigger
+      collapse-mode="width"
+      :collapsed-width="64"
+      :width="220"
+      class="app-sider"
+    >
+      <div class="app-brand">NaiveUI</div>
+      <n-menu v-model:value="activeKey" :options="menuOptions" />
+    </n-layout-sider>
+    <n-layout>
+      <n-layout-header bordered class="app-header">控制台</n-layout-header>
+      <n-layout-content class="app-content">
+        <div class="content-card">这里是主内容区域</div>
+      </n-layout-content>
+      <n-layout-footer bordered class="app-footer">© 2026 Electron + Naive UI</n-layout-footer>
+    </n-layout>
+  </n-layout>
 </template>
