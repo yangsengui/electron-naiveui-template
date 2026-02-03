@@ -43,10 +43,10 @@ function login(): void {
 
     <div class="login-left">
       <div class="brand-content">
-        <img :src="electronLogo" alt="Logo" class="logo" />
+        <img :src="electronLogo" alt="应用标志" class="logo" />
         <h1 class="brand-title">Electron Naive</h1>
         <p class="brand-desc">
-          High performance, intuitive, and modern dashboard solution.
+          高性能、直观、现代化的后台管理解决方案。
         </p>
       </div>
       <div class="decoration-circle"></div>
@@ -56,15 +56,15 @@ function login(): void {
     <div class="login-right">
       <div class="login-form-container">
         <div class="header-text">
-          <h2>Welcome Back</h2>
-          <p>Please enter your details to sign in.</p>
+          <h2>欢迎回来</h2>
+          <p>请输入账号信息以登录。</p>
         </div>
 
         <n-form size="large" class="login-form">
           <n-form-item :show-label="false">
             <n-input
               v-model:value="username"
-              placeholder="Username"
+              placeholder="用户名"
               clearable
               @keyup.enter="login"
             >
@@ -78,7 +78,7 @@ function login(): void {
               v-model:value="password"
               type="password"
               show-password-on="click"
-              placeholder="Password"
+              placeholder="密码"
               @keyup.enter="login"
             >
               <template #prefix>
@@ -98,12 +98,12 @@ function login(): void {
           block
           @click="login"
         >
-          Sign In
+          登录
         </n-button>
 
         <div class="footer-links">
-          <span>Don't have an account?</span>
-          <span class="link">Create account</span>
+          <span>还没有账号？</span>
+          <span class="link">创建账号</span>
         </div>
       </div>
     </div>
