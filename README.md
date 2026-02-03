@@ -118,6 +118,12 @@ src/
 
 说明：当前主进程未内置自动更新逻辑。若需要启用，请在主进程接入 `autoUpdater`（例如在 `app.whenReady()` 后调用 `checkForUpdatesAndNotify()`），并将 `publish` 替换为你的真实发布渠道（如 `github` / `generic` / 私有更新服务）。
 
+### 方案二：Distromate 分发助手
+
+感谢 <a href="https://www.distromate.net/">Distromate 分发助手</a> 提供支持
+
+<a href="https://www.distromate.net/"><img alt="Distromate" src="https://obsidian-static.s3.bitiful.net/2026/01/%E9%A1%B5%E9%9D%A2%201.png" width="250" height=""></a>
+
 ## 推荐 IDE
 
 - VSCode + ESLint + Prettier + Volar
