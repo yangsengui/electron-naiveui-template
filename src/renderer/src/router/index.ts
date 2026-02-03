@@ -1,8 +1,16 @@
 import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+const AUTH_TOKEN_KEY = 'auth:token'
+
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/overview' },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@renderer/pages/LoginPage.vue'),
+    meta: { title: '登录' }
+  },
   {
     path: '/overview',
     name: 'overview',
@@ -68,3 +76,14 @@ export const router = createRouter({
   routes
 })
 
+router.beforeEach((to) => {
+  const authed = !!localStorage.getItem(AUTH_TOKEN_KEY)
+
+  if (to.path === '/login') {
+    if (authed) return { path: '/overview' }
+    return true
+  }
+
+  if (!authed) return { path: '/login', query: { redirect: to.fullPath } }
+  return true
+})

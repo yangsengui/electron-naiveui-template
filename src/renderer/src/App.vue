@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
-import type { MenuOption } from 'naive-ui'
+import type { DropdownOption, MenuOption } from 'naive-ui'
 import { computed, h, onMounted, ref, watch } from 'vue'
 import {
+  NAvatar,
   NButton,
   NConfigProvider,
+  NDropdown,
   NGlobalStyle,
   NTooltip,
+  NText,
   darkTheme,
   NLayout,
   NLayoutContent,
@@ -17,8 +20,12 @@ import {
 } from 'naive-ui'
 import {
   BookOutline as BookIcon,
+  ChevronDownOutline as ChevronDownIcon,
+  LogOutOutline as LogOutIcon,
   MoonOutline as MoonIcon,
   PersonOutline as PersonIcon,
+  SettingsOutline as SettingsIcon,
+  PersonCircleOutline as ProfileIcon,
   SunnyOutline as SunIcon,
   WineOutline as WineIcon
 } from '@vicons/ionicons5'
@@ -30,6 +37,8 @@ function renderIcon(icon: Component) {
 }
 
 const STORAGE_KEY = 'theme:dark'
+const AUTH_TOKEN_KEY = 'auth:token'
+const AUTH_NAME_KEY = 'auth:name'
 const APP_BG_LIGHT = '#f6f7fb'
 const APP_BG_DARK = '#101014'
 const TITLEBAR_BG_LIGHT = '#ffffff'
@@ -100,6 +109,38 @@ const menuOptions: MenuOption[] = [
 const route = useRoute()
 const router = useRouter()
 const collapsed = ref(false)
+const isAuthRoute = computed(() => route.path === '/login')
+const userName = ref(localStorage.getItem(AUTH_NAME_KEY) ?? '管理员')
+
+watch(
+  () => route.path,
+  () => {
+    const name = localStorage.getItem(AUTH_NAME_KEY)
+    if (name) userName.value = name
+  }
+)
+
+const userDropdownOptions: DropdownOption[] = [
+  { label: '个人资料', key: 'profile', icon: renderIcon(ProfileIcon) },
+  { label: '设置', key: 'settings', icon: renderIcon(SettingsIcon) },
+  { label: '退出登录', key: 'logout', icon: renderIcon(LogOutIcon) }
+]
+
+function handleUserSelect(key: string): void {
+  if (key === 'settings') {
+    router.push('/settings')
+    return
+  }
+  if (key === 'logout') {
+    localStorage.removeItem(AUTH_TOKEN_KEY)
+    localStorage.removeItem(AUTH_NAME_KEY)
+    router.replace('/login')
+    return
+  }
+  if (key === 'profile') {
+    console.log('profile clicked')
+  }
+}
 
 const activeKey = computed<string | null>({
   get: () => route.path,
@@ -125,10 +166,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <n-config-provider :theme="naiveTheme" class="app-root">
+  <n-config-provider :theme="naiveTheme" :class="['app-root', { 'is-dark': isDark }]">
     <n-global-style />
-    <n-layout has-sider class="app-layout">
+    <n-layout :has-sider="!isAuthRoute" class="app-layout">
       <n-layout-sider
+        v-if="!isAuthRoute"
         bordered
         show-trigger
         collapse-mode="width"
@@ -143,13 +185,24 @@ onMounted(() => {
           <img class="app-logo" :src="logoUrl" alt="logo" />
           <span v-if="!collapsed">控制台</span>
         </div>
-        <n-menu
-          v-model:value="activeKey"
-          :options="menuOptions"
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-        />
+        <div class="app-sider-menu">
+          <n-menu
+            v-model:value="activeKey"
+            :options="menuOptions"
+            :collapsed="collapsed"
+            :collapsed-width="64"
+            :collapsed-icon-size="22"
+          />
+        </div>
+        <div class="app-sider-footer">
+          <n-dropdown :options="userDropdownOptions" placement="top-start" trigger="click" @select="handleUserSelect">
+            <div class="app-user" :class="{ collapsed }">
+              <n-avatar round size="small">{{ userName.slice(0, 1) }}</n-avatar>
+              <n-text v-if="!collapsed" class="app-user-name">{{ userName }}</n-text>
+              <n-icon v-if="!collapsed" class="app-user-caret" :component="ChevronDownIcon" />
+            </div>
+          </n-dropdown>
+        </div>
       </n-layout-sider>
       <n-layout>
         <n-layout-header
@@ -182,6 +235,61 @@ onMounted(() => {
 <style>
 .app-root {
   height: 100%;
+}
+
+.app-sider .n-layout-sider-scroll-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-sider-menu {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.app-sider-footer {
+  padding: 10px 10px 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.is-dark .app-sider-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.app-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.app-user:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.is-dark .app-user:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-user-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-user-caret {
+  opacity: 0.7;
+}
+
+.app-user.collapsed {
+  justify-content: center;
+  padding: 8px 0;
 }
 
 .app-titlebar {

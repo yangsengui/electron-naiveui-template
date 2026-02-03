@@ -1,28 +1,32 @@
 <script setup lang="ts">
-import { NCard, NP, NSpace, NTag } from 'naive-ui'
+import type { DataTableColumns } from 'naive-ui'
+import { h } from 'vue'
+import { NDataTable, NTag } from 'naive-ui'
 
-const archived = [
-  { name: '旧版 UI', date: '2025-11-02' },
-  { name: '实验性功能分支', date: '2025-09-18' }
+type ArchivedRow = {
+  id: number
+  name: string
+  date: string
+  reason: string
+}
+
+const archived: ArchivedRow[] = [
+  { id: 1, name: '旧版 UI', date: '2025-11-02', reason: '重构到 Naive UI' },
+  { id: 2, name: '实验性功能分支', date: '2025-09-18', reason: '方案验证结束' }
+]
+
+const columns: DataTableColumns<ArchivedRow> = [
+  { title: '项目', key: 'name', minWidth: 220 },
+  { title: '归档时间', key: 'date', width: 140 },
+  {
+    title: '原因',
+    key: 'reason',
+    minWidth: 180,
+    render: (row) => h(NTag, { size: 'small', type: 'default' }, { default: () => row.reason })
+  }
 ]
 </script>
 
 <template>
-  <n-space vertical size="large">
-    <n-card size="small">
-      <n-space align="center">
-        <n-tag type="default">Archived</n-tag>
-        <n-p depth="3" style="margin: 0">共 {{ archived.length }} 个</n-p>
-      </n-space>
-    </n-card>
-
-    <n-card title="归档列表" size="small">
-      <n-space vertical>
-        <div v-for="it in archived" :key="it.name">
-          <strong>{{ it.name }}</strong>
-          <n-p depth="3" style="margin: 4px 0 0">归档时间：{{ it.date }}</n-p>
-        </div>
-      </n-space>
-    </n-card>
-  </n-space>
+  <n-data-table :columns="columns" :data="archived" :pagination="{ pageSize: 10 }" :row-key="(row) => row.id" />
 </template>

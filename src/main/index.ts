@@ -18,7 +18,7 @@ function parseHexColor(hex: string): { r: number; g: number; b: number } {
 }
 
 function toHexColor({ r, g, b }: { r: number; g: number; b: number }): string {
-  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)))
+  const clamp = (v: number): number => Math.max(0, Math.min(255, Math.round(v)))
   return `#${clamp(r).toString(16).padStart(2, '0')}${clamp(g).toString(16).padStart(2, '0')}${clamp(b)
     .toString(16)
     .padStart(2, '0')}`
